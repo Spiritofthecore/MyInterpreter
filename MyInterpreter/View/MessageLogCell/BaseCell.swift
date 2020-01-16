@@ -2,14 +2,15 @@
 //  BaseCell.swift
 //  MyInterpreter
 //
-//  Created by Tom on 6/12/19.
-//  Copyright © 2019 Tom. All rights reserved.
+//  Created by HoangCuong on 1/11/20.
+//  Copyright © 2020 Tom. All rights reserved.
 //
 
 import UIKit
+import AVKit
 
 class BaseCell: UITableViewCell {
-
+    var cellComponents = CellComponent()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -20,8 +21,5 @@ class BaseCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setupViews() {
-        
-    }
-
+    func setupViews() { }
 }

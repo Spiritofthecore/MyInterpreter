@@ -16,9 +16,7 @@ class SignUpStage1VC: UIViewController {
     @IBOutlet weak var motherLanguagePicker: UIPickerView!
     @IBOutlet weak var secondLanguagePicker: UIPickerView!
     @IBOutlet weak var lblError: UILabel!
-    
-    static var user = User()
-    
+        
     var languages: [String] = []
     {
         didSet{
@@ -95,9 +93,9 @@ class SignUpStage1VC: UIViewController {
                 secondLang = languages[0]
             }
             
-            SignUpStage1VC.user.setName(name: name)
-            SignUpStage1VC.user.setMotherLanguage(motherLanguage: motherLang)
-            SignUpStage1VC.user.setSecondLanguage(secondLanguage: secondLang)
+            User.shareInstance.setName(name: name)
+            User.shareInstance.setMotherLanguage(motherLanguage: motherLang)
+            User.shareInstance.setSecondLanguage(secondLanguage: secondLang)
             performSegue(withIdentifier: "userRegisterSegue1", sender: self)
         }
     }

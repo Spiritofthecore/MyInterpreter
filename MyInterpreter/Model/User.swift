@@ -18,6 +18,8 @@ class User
     var profileImageURL: String
     var booking: String
     var status: Bool
+    
+    static var shareInstance = User()
 
     init()
     {

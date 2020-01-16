@@ -219,30 +219,37 @@ class ConfirmPaymentVC: UIViewController {
         let l = UInt(comps!.last!)
         
         let cardParams =  STPCardParams()
-        guard case cardParams.number = cardNumberTxtFlield.text! else {
-            self.customAlertAction(title: "Error!", message: "Some information are missing!")
-            self.spinner.stopAnimating()
-            self.bookButton.status(enable: true, hidden: false)
-            return
-        }
-        guard case cardParams.expMonth = f! else {
-            self.customAlertAction(title: "Error!", message: "Some information are missing!")
-            self.spinner.stopAnimating()
-            self.bookButton.status(enable: true, hidden: false)
-            return
-        }
-        guard case cardParams.expYear = l! else {
-            self.customAlertAction(title: "Error!", message: "Some information are missing!")
-            self.spinner.stopAnimating()
-            self.bookButton.status(enable: true, hidden: false)
-            return
-        }
-        guard case cardParams.cvc = cvcTxtField.text! else {
-            self.customAlertAction(title: "Error!", message: "Some information are missing!")
-            self.spinner.stopAnimating()
-            self.bookButton.status(enable: true, hidden: false)
-            return
-        }
+        cardParams.number = cardNumberTxtFlield.text!.replacingOccurrences(of: " ", with: "")
+//        guard case cardParams.number = cardNumberTxtFlield.text!.replacingOccurrences(of: " ", with: "") else {
+//            self.customAlertAction(title: "Error!", message: "Some information are missing!")
+//            self.spinner.stopAnimating()
+//            self.bookButton.status(enable: true, hidden: false)
+//            return
+//        }
+        
+        cardParams.expMonth = f!
+//        guard let cardParams.expMonth = f else {
+//            self.customAlertAction(title: "Error!", message: "Some information are missing!")
+//            self.spinner.stopAnimating()
+//            self.bookButton.status(enable: true, hidden: false)
+//            return
+//        }
+        
+        cardParams.expYear = l!
+//        guard let cardParams.expYear = l! else {
+//            self.customAlertAction(title: "Error!", message: "Some information are missing!")
+//            self.spinner.stopAnimating()
+//            self.bookButton.status(enable: true, hidden: false)
+//            return
+//        }
+        
+        cardParams.cvc = cvcTxtField.text!
+//        guard let cardParams.cvc = cvcTxtField.text! else {
+//            self.customAlertAction(title: "Error!", message: "Some information are missing!")
+//            self.spinner.stopAnimating()
+//            self.bookButton.status(enable: true, hidden: false)
+//            return
+//        }
         
         STPAPIClient.shared().createToken(withCard: cardParams) { (token: STPToken?, error: Error?) in
             
@@ -274,7 +281,6 @@ class ConfirmPaymentVC: UIViewController {
                     let databaseRef = Database.database().reference()
                     
                     // Update users booking status (default: "interpreter0" - means the user hasn't booked anyone yet)
-                    //databaseRef.child("users/\(self.emailEncoded(email: (Auth.auth().currentUser?.email)!))/booking").setValue("\(self.emailEncoded(email: ListInterpretersVC.selectedInterpreter.getEmail()))")
                     let bookingsRef = databaseRef.child("bookings")
                     bookingsRef.childByAutoId().setValue(["interpreter": ListInterpretersVC.selectedInterpreter.email.getEncodedEmail(), "price": "$\(Double(PaymentVC.price) / 100)", "user": (Auth.auth().currentUser?.email?.getEncodedEmail())!, "timeStart": self.today.toDate(), "timeEnd": Calendar.current.date(byAdding: .day, value: PaymentVC.numberOfDays, to: self.today)?.toDate() as Any, "confirm": false])
                     
@@ -307,7 +313,6 @@ class ConfirmPaymentVC: UIViewController {
             }
         }
     }
-    
 }
 
 

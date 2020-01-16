@@ -150,9 +150,8 @@ class SignUpStage2VC: UIViewController {
             { (user: AuthDataResult?, error: Error?) in
                 if user != nil && error == nil
                 {
-                    SignUpStage1VC.user.setEmail(email: email)
-                    self.saveUserInfo(user: SignUpStage1VC.user)
-                    
+                    User.shareInstance.setEmail(email: email)
+                    self.saveUserInfo(user: User.shareInstance)
                     self.spinner.stopAnimating()
                     self.createButton.status(enable: true, hidden: false)
                     

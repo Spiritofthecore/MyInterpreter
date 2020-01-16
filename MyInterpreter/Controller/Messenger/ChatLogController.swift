@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
     var chatter: String = ""
     var interpreterEmail: String = ""
@@ -19,7 +19,6 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
     var cache = NSCache<AnyObject, AnyObject>()
     var doneCellCount: Int = 0
 
-    
     func downloadImage(from urlString: String, completion: @escaping (UIImage) -> ()) {
         if let cachedImage = cache.object(forKey: urlString as AnyObject) {
             completion(cachedImage as! UIImage)
@@ -38,111 +37,13 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         }
     }
     
-    func getInterpreterInfo(with id: String, completion: @escaping (Interpreter) -> ()) {
-        let interpreterRef = Database.database().reference().child("interpreters").child(interpreterEmail.getEncodedEmail())
-        
-        interpreterRef.observeSingleEvent(of: .value) { (snapshot) in
-            let interpreterDic = snapshot.value as! NSDictionary
-            
-            completion(Interpreter(dic: interpreterDic))
-        }
-        
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if (messages.count == 0) {
-            tableView.setEmptyView(title: "Chat log is empty", message: "Your conversation here")
-        } else {
-            tableView.restore()
-        }
-        return messages.count
-    }
-        
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! ChatLogMessageCell
-        
-        let cellSide: messageSide
-        
-        if (self.messages[indexPath.row].sender != chatter) {
-            cell.profileImageView.image = leftCellProfileImage
-            cellSide = .left
-        } else {
-            cellSide = .right
-        }
-        
-        if messages[indexPath.row].imageURL != "" {
-            if let cachedImage = cache.object(forKey: messages[indexPath.row].imageURL as AnyObject) as? UIImage {
-                cell.messageContent = .image(content: cachedImage, viewWidth: self.view.frame.width, viewHeight:
-                    self.view.frame.height, side: cellSide)
-                setUpImageTapGesture(cell: cell)
-            } else {
-                cell.messageContent = .none
-            }
-        } else if messages[indexPath.row].text != "" {
-            cell.messageContent = .text(content: self.messages[indexPath.row].text, viewWidth: self.view.frame.width, side: cellSide)
-        } else if messages[indexPath.row].videoURL != "" {
-            
-        }
-        return cell
-    }
-    
-    func setUpImageTapGesture(cell: ChatLogMessageCell) {
-        cell.imageContentView.isUserInteractionEnabled = true
+    func applyImageTapGesture(to view: UIView) {
+        view.isUserInteractionEnabled = true
         let singleTap = UITapGestureRecognizer(target: self, action: #selector(imageTapDetected(sender:)))
         singleTap.numberOfTapsRequired = 1
         singleTap.numberOfTouchesRequired = 1
-        cell.imageContentView.addGestureRecognizer(singleTap)
+        view.addGestureRecognizer(singleTap)
     }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        
-        
-        if messages[indexPath.row].imageURL != "" {
-            return calculateImageCellHeight(indexPath: indexPath)
-        } else if messages[indexPath.row].text != "" {
-            return calculateTextCellHeight(indexPath: indexPath)
-        } else if messages[indexPath.row].videoURL != "" {
-            return calculateVideoCellHeight(indexPath: indexPath)
-        }
-        return 0
-    }
-    
-    func calculateTextCellHeight(indexPath: IndexPath) -> CGFloat {
-        let text = messages[indexPath.row].text
-        let sizeToFit = CGSize(width: view.frame.width * 2 / 3, height: CGFloat.greatestFiniteMagnitude)
-        
-        return text.getTextViewRect(sizeToFit: sizeToFit, font: UIFont.systemFont(ofSize: 16), startPoint: CGPoint(x: 0, y: 0)).height + 20
-    }
-    
-    func calculateImageCellHeight(indexPath: IndexPath) -> CGFloat {
-        var height: CGFloat = 0
-        
-        if let cachedImage = cache.object(forKey: messages[indexPath.row].imageURL as AnyObject) as? UIImage {
-            let ratio = cachedImage.size.width / cachedImage.size.height
-            let maxWidth = self.view.frame.width / 3 * 2
-            let maxHeight = self.view.frame.height / 3
-            
-            if ratio > 1.0 { //landscape image
-                height = maxWidth / ratio + 20
-            } else {
-                height = maxHeight + 20
-            }
-        }
-        
-        return height
-    }
-    
-    func calculateVideoCellHeight(indexPath: IndexPath) -> CGFloat {
-        return 0
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = UIView()
-        
-        headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 8)
-        return headerView
-    }
-    
     
     private let cellID = "cellID"
     let tableView = UITableView()
@@ -198,6 +99,8 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         
         hideKeyboard()
         
+        observeMessage()
+        
         
         tabBarController?.tabBar.isHidden = true
         
@@ -207,20 +110,6 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         tableView.register(ChatLogMessageCell.self, forCellReuseIdentifier: cellID)
         tableView.separatorColor = .clear
         tableView.allowsSelection = false
-        
-        observeMessage { (message) in
-            if message.imageURL != "" {
-                self.downloadImage(from: message.imageURL, completion: { _ in
-                    self.tableView.reloadData()
-                    self.doneCellCount = self.doneCellCount + 1
-                    self.scrollToBottom()
-                })
-            } else {
-                self.tableView.reloadData()
-                self.doneCellCount = self.doneCellCount + 1
-                self.scrollToBottom()
-            }
-        }
         
         view.addSubview(messageInputContainerView)
         messageInputContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -256,39 +145,21 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         }
     }
     
-    func observeMessage(completion: @escaping (Message) -> ()) {
-        Database.database().reference().child("messages").queryOrdered(byChild: "user").queryEqual(toValue: userId).observe(.childAdded) { (snapshot) in
-            
-            guard let newMessage = snapshot.value as? NSDictionary else {
-                return
-            }
-            
-            let encodedEmail = self.interpreterEmail.getEncodedEmail()
-            if (newMessage.value(forKey: "interpreter") as? String == encodedEmail) {
-                if (newMessage.value(forKey: "image") != nil) {
-                    let message = Message(sender: newMessage.value(forKey: "sender") as! String, imageURL: newMessage.value(forKey: "image") as! String, user: newMessage.value(forKey: "user") as! String, interpreter: newMessage.value(forKey: "interpreter") as! String, time: newMessage.value(forKey: "time") as! String)
-                    self.messages.append(message)
-                    completion(message)
-                } else if (newMessage.value(forKey: "text") != nil) {
-                    let message = Message(sender: newMessage.value(forKey: "sender") as! String, text: newMessage.value(forKey: "text") as! String, user: newMessage.value(forKey: "user") as! String, interpreter: newMessage.value(forKey: "interpreter") as! String, time: newMessage.value(forKey: "time") as! String)
-                    self.messages.append(message)
-                    completion(message)
-                } else if (newMessage.value(forKey: "video") != nil) {
-                    let message = Message(sender: newMessage.value(forKey: "sender") as! String, videoURL: newMessage.value(forKey: "video") as! String, user: newMessage.value(forKey: "user") as! String, interpreter: newMessage.value(forKey: "interpreter") as! String, time: newMessage.value(forKey: "time") as! String)
-                    self.messages.append(message)
-                    completion(message)
-                }
-            }
-        }
+    func observeMessage() {
+        let firebaseObserver = FirebaseHandler()
+        firebaseObserver.delegate = self
+        firebaseObserver.addMessageObserver(for: userId, interpreterEmail: interpreterEmail)
     }
     
     @objc func sendMessage() {
         if (inputTextField.text != "") {
-            let stringDate = Date().getString(with: "yyyy-MM-dd HH:mm:ss")
-            let messageRef = Database.database().reference().child("messages").childByAutoId()
-            messageRef.updateChildValues(["sender": chatter, "text": inputTextField.text!, "user": self.userId, "interpreter": self.interpreterEmail.getEncodedEmail(), "time": stringDate])
+            let firebaseHandler = FirebaseHandler()
+            if (Auth.auth().currentUser?.email!.getEncodedEmail().contains("interpreter"))! {
+                firebaseHandler.sendTextMessage(sender: chatter, text: inputTextField.text!, userId: userId, interpreterId: (Auth.auth().currentUser?.email!.getEncodedEmail())!)
+            } else {
+                firebaseHandler.sendTextMessage(sender: chatter, text: inputTextField.text!, userId: userId, interpreterId: interpreterEmail.getEncodedEmail())
+            }
             self.inputTextField.text = ""
-            
         }
     }
     
@@ -322,8 +193,7 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         self.present(actionSheet, animated: true, completion: nil)
     }
     
-    
-    
+    // MARK: send image
     func sendImageButtonTouched() {
         let imagePickerController = UIImagePickerController()
         
@@ -356,10 +226,8 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
     }
     
     func uploadMessageToFirebase(using messageImage: UIImage) {
-        let stringDate = Date().getString(with: "yyyy-MM-dd HH:mm:ss")
-        
-        
-        let storageRef = Storage.storage().reference().child("message_images").child(userId + interpreterEmail.getEncodedEmail() + stringDate + ".png")
+        let firebaseRef = FirebaseHandler()
+        let storageRef = firebaseRef.getNewMessageImageStorageReference(userId: userId, interpreterId: interpreterEmail.getEncodedEmail())
         
         if let messageImageData = messageImage.pngData()
         {
@@ -376,17 +244,12 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
                         return
                     }
                     let urlString = url?.absoluteString
-                    self.sendImage(with: urlString!)
+                    let firebaseHandler = FirebaseHandler()
+                    firebaseHandler.sendImageMessage(sender: self.chatter, imageURL: urlString ?? "", userId: self.userId, interpreterId: self.interpreterEmail.getEncodedEmail())
                 })
                 
             }
         }
-    }
-    
-    func sendImage(with urlString: String) {
-        let stringDate = Date().getString(with: "yyyy-MM-dd HH:mm:ss")
-        let messageRef = Database.database().reference().child("messages").childByAutoId()
-        messageRef.updateChildValues(["sender": chatter, "image": urlString, "user": self.userId, "interpreter": self.interpreterEmail.getEncodedEmail(), "time": stringDate])
     }
     
     private func alertAction(title: String, message: String)
@@ -418,7 +281,6 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         }
     }
     
-    
     @objc func imageTapDetected(sender: UITapGestureRecognizer) {
         let imageView = sender.view as? UIImageView
         let controller = FullImageViewController()
@@ -449,5 +311,114 @@ class ChatLogController: UIViewController, UITableViewDelegate, UITableViewDataS
         sendButton.leadingAnchor.constraint(equalTo: inputTextField.trailingAnchor).isActive = true
         sendButton.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor).isActive = true
         sendButton.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
+    }
+}
+
+extension ChatLogController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if (messages.count == 0) {
+            tableView.setEmptyView(title: "Chat log is empty", message: "Your conversation here")
+        } else {
+            tableView.restore()
+        }
+        return messages.count
+    }
+        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! ChatLogMessageCell
+        let director = Director()
+        if messages[indexPath.row].imageURL != "" {
+            director.builder = ImageCellBuilder()
+            if let cachedImage = cache.object(forKey: messages[indexPath.row].imageURL as AnyObject) as? UIImage {
+                if (self.messages[indexPath.row].sender != chatter) {
+                    director.buildLeftImageCell(image: cachedImage, viewSize: self.view.frame.size, avatarImage: leftCellProfileImage!)
+                    cell.cellComponents = director.builder!.getProduct()
+                } else {
+                    director.buildRightImageCell(image: cachedImage, viewSize: self.view.frame.size)
+                    cell.cellComponents = director.builder!.getProduct()
+                }
+                self.applyImageTapGesture(to: cell.cellComponents)
+            } else {
+                director.builder = IndicatorCellBuilder()
+                if (self.messages[indexPath.row].sender != chatter) {
+                    director.buildLeftLoadingCell(viewWidth: self.view.frame.width, avatarImage: leftCellProfileImage!)
+                    cell.cellComponents = director.builder!.getProduct()
+                } else {
+                    director.buildRightLoadingCell(viewSize: self.view.frame.size)
+                    cell.cellComponents = director.builder!.getProduct()
+                }
+            }
+        } else if messages[indexPath.row].text != "" {
+            director.builder = TextCellBuilder()
+            if (self.messages[indexPath.row].sender != chatter) {
+                director.buildLeftTextCell(text: messages[indexPath.row].text, viewWidth: self.view.frame.width, avatarImage: leftCellProfileImage!)
+                cell.cellComponents = director.builder!.getProduct()
+            } else {
+                director.buildRightTextCell(text: messages[indexPath.row].text, viewWidth: self.view.frame.width)
+                cell.cellComponents = director.builder!.getProduct()
+            }
+        }
+        cell.adjustLayout()
+        return cell
+    }
+}
+
+extension ChatLogController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if messages[indexPath.row].imageURL != "" {
+            return calculateImageCellHeight(indexPath: indexPath)
+        } else if messages[indexPath.row].text != "" {
+            return calculateTextCellHeight(indexPath: indexPath)
+        }
+        return 0
+    }
+
+    
+    func calculateTextCellHeight(indexPath: IndexPath) -> CGFloat {
+        let text = messages[indexPath.row].text
+        let sizeToFit = CGSize(width: view.frame.width * 2 / 3, height: CGFloat.greatestFiniteMagnitude)
+        
+        return text.getTextViewRect(sizeToFit: sizeToFit, font: UIFont.systemFont(ofSize: 16), startPoint: CGPoint(x: 0, y: 0)).height + 20
+    }
+    
+    func calculateImageCellHeight(indexPath: IndexPath) -> CGFloat {
+        var height: CGFloat = 0
+        
+        if let cachedImage = cache.object(forKey: messages[indexPath.row].imageURL as AnyObject) as? UIImage {
+            let ratio = cachedImage.size.width / cachedImage.size.height
+            let maxWidth = self.view.frame.width / 3 * 2
+            let maxHeight = self.view.frame.height / 3
+            
+            if ratio > 1.0 { //landscape image
+                height = maxWidth / ratio + 20
+            } else {
+                height = maxHeight + 20
+            }
+        }
+        
+        return height
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = UIView()
+        headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 8)
+        return headerView
+    }
+}
+
+extension ChatLogController: FirebaseObserverDelegation {
+    func addMessage(message: Message) {
+        self.messages.append(message)
+        if message.imageURL != "" {
+            self.downloadImage(from: message.imageURL, completion: { _ in
+                self.tableView.reloadData()
+                self.doneCellCount = self.doneCellCount + 1
+                self.scrollToBottom()
+            })
+        } else {
+            self.tableView.reloadData()
+            self.doneCellCount = self.doneCellCount + 1
+            self.scrollToBottom()
+        }
     }
 }
