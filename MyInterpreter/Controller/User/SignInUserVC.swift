@@ -92,43 +92,10 @@ class SignInUserVC: UIViewController
         guard let email = emailField.text else {return}
         guard let pass = passwordField.text else {return}
         
-        Auth.auth().signIn(withEmail: email, password: pass) { (user: AuthDataResult?, error: Error?) in
-            if user != nil
-            {
-                let bookingRef = Database.database().reference()
-                
-                let bookingPath = bookingRef.child("users").child(email.getEncodedEmail()).child("booking")
-                
-                bookingPath.observeSingleEvent(of: .value) { (snapshot: DataSnapshot) in
-                    
-                    let bookingObject = snapshot.value as! String
-                    if bookingObject.contains("interpreter0")
-                    {
-                        self.loginButton.status(enable: true, hidden: false)
-                        self.spinner.stopAnimating()
-                        
-                        self.performSegue(withIdentifier: "userLogInSegue", sender: self)
-                    }
-                    else
-                    {
-                        self.loginButton.status(enable: true, hidden: false)
-                        self.spinner.stopAnimating()
-                        self.performSegue(withIdentifier: "userDashboardSegue", sender: self)
-                    }
-                }
-            }
-            else
-            {
-                self.lblError.isHidden = false
-                self.lblError.text = error!.localizedDescription
-                
-                self.loginButton.status(enable: true, hidden: false)
-                self.spinner.stopAnimating()
-            }
-        }
+        let signInCommand = SignInCommand(email: email, password: pass)
+        signInCommand.delegate = self
+        signInCommand.execute()
     }
-    
-
 }
 
 // MARK: Delegate --------TEXT FIELD--------
@@ -148,5 +115,22 @@ extension SignInUserVC: UITextFieldDelegate
             break
         }
         return true
+    }
+}
+
+extension SignInUserVC: SignInDoneDelegate {
+    func handleResult(error: Error?, isBooking: Bool) {
+        self.loginButton.status(enable: true, hidden: false)
+        self.spinner.stopAnimating()
+        if let error = error {
+            self.lblError.isHidden = false
+            self.lblError.text = error.localizedDescription
+        } else {
+            if isBooking {
+                self.performSegue(withIdentifier: "userDashboardSegue", sender: self)
+            } else {
+                self.performSegue(withIdentifier: "userLogInSegue", sender: self)
+            }
+        }
     }
 }

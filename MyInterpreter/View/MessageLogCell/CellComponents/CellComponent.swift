@@ -12,6 +12,7 @@ class CellComponent: UIView {
     var oponentAvatar: UIImageView?
     
     func reset() {
+        oponentAvatar?.removeFromSuperview()
         oponentAvatar = nil
     }
 }

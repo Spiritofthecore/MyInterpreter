@@ -22,6 +22,8 @@ extension MessageLogCellBuilder {
     func addAvatarImage(image: UIImage) {
         cellComponent.oponentAvatar = UIImageView(image: image)
         cellComponent.oponentAvatar!.backgroundColor = .clear
+        cellComponent.oponentAvatar!.layer.cornerRadius = 15
+        cellComponent.oponentAvatar!.layer.masksToBounds = true
         cellComponent.addSubview(cellComponent.oponentAvatar!)
         cellComponent.oponentAvatar!.translatesAutoresizingMaskIntoConstraints = false
         

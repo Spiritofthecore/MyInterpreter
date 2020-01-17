@@ -14,6 +14,8 @@ class VideoComponent: CellComponent {
     
     override func reset() {
         super.reset()
+        videoPlayer?.pause()
+        videoPlayer?.seek(to: .zero)
         videoPlayer = nil
     }
 }

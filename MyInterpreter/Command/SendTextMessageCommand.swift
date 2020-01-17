@@ -9,7 +9,7 @@
 import Foundation
 import Firebase
 
-class SendTextMessageCommand: GetSetCommand {
+class SendTextMessageCommand: FirebaseCommand {
     var sender: String
     var text: String
     var userId: String
@@ -21,13 +21,8 @@ class SendTextMessageCommand: GetSetCommand {
         self.interpreterId = interpreterId
     }
     
-    func getMessageReference() -> DatabaseReference {
-        return Database.database().reference().child("messages").childByAutoId()
-    }
-    
-    func execute() {
-        let stringDate = self.getDateFormat()
-        let messageRef = self.getMessageReference()
-        messageRef.updateChildValues(["sender": sender, "text": text, "user": userId, "interpreter": interpreterId, "time": stringDate])
+    override func execute() {
+        let dateString = Date().getString(with: dateFormat)
+        messagesReference.childByAutoId().updateChildValues(["sender": sender, "text": text, "user": userId, "interpreter": interpreterId, "time": dateString])
     }
 }

@@ -11,6 +11,7 @@ import Firebase
 
 class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
+    // MARK: Variable
     var chatter: String = ""
     var interpreterEmail: String = ""
     var userId: String = ""
@@ -18,7 +19,11 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
     var leftCellProfileImage: UIImage?
     var cache = NSCache<AnyObject, AnyObject>()
     var doneCellCount: Int = 0
+    var firebaseCommandsNeedTracking: [FirebaseCommand]?
+    var messageInputBottomAnchor: NSLayoutConstraint?
+    var messageInputActivateBottomAnchor: NSLayoutConstraint?
 
+    // MARK: - downloadImage
     func downloadImage(from urlString: String, completion: @escaping (UIImage) -> ()) {
         if let cachedImage = cache.object(forKey: urlString as AnyObject) {
             completion(cachedImage as! UIImage)
@@ -45,6 +50,7 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         view.addGestureRecognizer(singleTap)
     }
     
+    // MARK: Init layout
     private let cellID = "cellID"
     let tableView = UITableView()
     
@@ -64,7 +70,7 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         let button = UIButton(type: .system)
         button.setTitle("Send", for: .normal)
         button.setTitleColor(#colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1), for: .normal)
-        button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
+        button.addTarget(self, action: #selector(sendTextMessage), for: .touchUpInside)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         return button
     }()
@@ -78,10 +84,30 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         return button
     }()
     
-    
-    
-    var messageInputBottomAnchor: NSLayoutConstraint?
-    var messageInputActivateBottomAnchor: NSLayoutConstraint?
+    private func setUpInputComponent() {
+        messageInputContainerView.addSubview(inputTextField)
+        messageInputContainerView.addSubview(sendButton)
+        messageInputContainerView.addSubview(plusButton)
+        
+        inputTextField.translatesAutoresizingMaskIntoConstraints = false
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+        plusButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        plusButton.leadingAnchor.constraint(equalTo: messageInputContainerView.leadingAnchor).isActive = true
+        plusButton.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor).isActive = true
+        plusButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        plusButton.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
+        
+        inputTextField.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor).isActive = true
+        inputTextField.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
+        inputTextField.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor, multiplier: 1).isActive = true
+        inputTextField.widthAnchor.constraint(equalToConstant: self.view.frame.width - 110).isActive = true
+        
+        sendButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        sendButton.leadingAnchor.constraint(equalTo: inputTextField.trailingAnchor).isActive = true
+        sendButton.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor).isActive = true
+        sendButton.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -101,7 +127,6 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         
         observeMessage()
         
-        
         tabBarController?.tabBar.isHidden = true
         
         tableView.dataSource = self
@@ -113,7 +138,6 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         
         view.addSubview(messageInputContainerView)
         messageInputContainerView.translatesAutoresizingMaskIntoConstraints = false
-        
         messageInputBottomAnchor = messageInputContainerView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 0)
         messageInputBottomAnchor?.isActive = true
         messageInputActivateBottomAnchor = messageInputContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0)
@@ -128,13 +152,8 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         tableView.bottomAnchor.constraint(equalTo: messageInputContainerView.topAnchor).isActive = true
         tableView.leftAnchor.constraint(equalTo: guide.leftAnchor).isActive = true
         tableView.rightAnchor.constraint(equalTo: guide.rightAnchor).isActive = true
-        
-        
-        
         setUpInputComponent()
-        
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
@@ -145,55 +164,29 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         }
     }
     
+    // MARK: - observeMessage
     func observeMessage() {
-        let firebaseObserver = FirebaseHandler()
-        firebaseObserver.delegate = self
-        firebaseObserver.addMessageObserver(for: userId, interpreterEmail: interpreterEmail)
+        let observeMessageCommand = ObserveNewMessagesCommand(userId: userId, interpreterId: interpreterEmail.getEncodedEmail())
+        firebaseCommandsNeedTracking?.append(observeMessageCommand)
+        observeMessageCommand.observer = self
+        observeMessageCommand.execute()
     }
     
-    @objc func sendMessage() {
+    // MARK: - sendTextMessage
+    @objc func sendTextMessage() {
         if (inputTextField.text != "") {
-            let firebaseHandler = FirebaseHandler()
             if (Auth.auth().currentUser?.email!.getEncodedEmail().contains("interpreter"))! {
-                firebaseHandler.sendTextMessage(sender: chatter, text: inputTextField.text!, userId: userId, interpreterId: (Auth.auth().currentUser?.email!.getEncodedEmail())!)
+                let sendTextCommand = SendTextMessageCommand(sender: chatter, text: inputTextField.text!, userId: userId, interpreterId: (Auth.auth().currentUser?.email!.getEncodedEmail())!)
+                sendTextCommand.execute()
             } else {
-                firebaseHandler.sendTextMessage(sender: chatter, text: inputTextField.text!, userId: userId, interpreterId: interpreterEmail.getEncodedEmail())
+                let sendTextCommand = SendTextMessageCommand(sender: chatter, text: inputTextField.text!, userId: userId, interpreterId: interpreterEmail.getEncodedEmail())
+                sendTextCommand.execute()
             }
             self.inputTextField.text = ""
         }
     }
     
-    @objc func plusButtonTouch() {
-        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        
-        // Create your actions - take a look at different style attributes
-        let sendImageAction = UIAlertAction(title: "Send Image", style: .default) { (action) in
-            // observe it in the buttons block, what button has been pressed
-            self.sendImageButtonTouched()
-        }
-        
-        let sendVideo = UIAlertAction(title: "Send Video", style: .default) { (action) in
-            print("didPress send video")
-        }
-        
-        let sendAudio = UIAlertAction(title: "Send Audio", style: .default) { (action) in
-            print("didPress send audio")
-        }
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
-            print("didPress cancel")
-        }
-        
-        // Add the actions to your actionSheet
-        actionSheet.addAction(sendImageAction)
-        actionSheet.addAction(sendVideo)
-        actionSheet.addAction(sendAudio)
-        actionSheet.addAction(cancelAction)
-        // Present the controller
-        self.present(actionSheet, animated: true, completion: nil)
-    }
-    
-    // MARK: send image
+    // MARK: - send image message
     func sendImageButtonTouched() {
         let imagePickerController = UIImagePickerController()
         
@@ -226,37 +219,46 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
     }
     
     func uploadMessageToFirebase(using messageImage: UIImage) {
-        let firebaseRef = FirebaseHandler()
-        let storageRef = firebaseRef.getNewMessageImageStorageReference(userId: userId, interpreterId: interpreterEmail.getEncodedEmail())
-        
-        if let messageImageData = messageImage.pngData()
-        {
-            storageRef.putData(messageImageData, metadata: nil) { (metaData, error) in
-                if error != nil
-                {
-                    self.alertAction(title: "Uploading image failed!", message: String(describing: error))
-                    return
-                }
-                storageRef.downloadURL(completion: { (url: URL?, error: Error?) in
-                    if error != nil
-                    {
-                        self.alertAction(title: "Uploading image failed!", message: String(describing: error))
-                        return
-                    }
-                    let urlString = url?.absoluteString
-                    let firebaseHandler = FirebaseHandler()
-                    firebaseHandler.sendImageMessage(sender: self.chatter, imageURL: urlString ?? "", userId: self.userId, interpreterId: self.interpreterEmail.getEncodedEmail())
-                })
-                
-            }
-        }
+        let uploadImageMessageCommand = UploadImageMessageCommand(userId: userId, interpreterId: interpreterEmail.getEncodedEmail(), messageImage: messageImage)
+        uploadImageMessageCommand.delegate = self
+        uploadImageMessageCommand.execute()
     }
     
+    // MARK: - user action
     private func alertAction(title: String, message: String)
     {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func plusButtonTouch() {
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        // Create your actions - take a look at different style attributes
+        let sendImageAction = UIAlertAction(title: "Send Image", style: .default) { (action) in
+            // observe it in the buttons block, what button has been pressed
+            self.sendImageButtonTouched()
+        }
+        
+        let sendVideo = UIAlertAction(title: "Send Video", style: .default) { (action) in
+            print("didPress send video")
+        }
+        
+        let sendAudio = UIAlertAction(title: "Send Audio", style: .default) { (action) in
+            print("didPress send audio")
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+            print("didPress cancel")
+        }
+        
+        // Add the actions to your actionSheet
+        actionSheet.addAction(sendImageAction)
+        actionSheet.addAction(sendVideo)
+        actionSheet.addAction(sendAudio)
+        actionSheet.addAction(cancelAction)
+        // Present the controller
+        self.present(actionSheet, animated: true, completion: nil)
     }
     
     @objc func handleKeyboardNotification(notification: Notification) {
@@ -287,33 +289,9 @@ class ChatLogController: UIViewController, UIImagePickerControllerDelegate, UINa
         controller.image = imageView?.image
         self.navigationController?.pushViewController(controller, animated: true)
     }
-    
-    private func setUpInputComponent() {
-        messageInputContainerView.addSubview(inputTextField)
-        messageInputContainerView.addSubview(sendButton)
-        messageInputContainerView.addSubview(plusButton)
-        
-        inputTextField.translatesAutoresizingMaskIntoConstraints = false
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        plusButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        plusButton.leadingAnchor.constraint(equalTo: messageInputContainerView.leadingAnchor).isActive = true
-        plusButton.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor).isActive = true
-        plusButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
-        plusButton.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
-        
-        inputTextField.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor).isActive = true
-        inputTextField.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
-        inputTextField.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor, multiplier: 1).isActive = true
-        inputTextField.widthAnchor.constraint(equalToConstant: self.view.frame.width - 110).isActive = true
-        
-        sendButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        sendButton.leadingAnchor.constraint(equalTo: inputTextField.trailingAnchor).isActive = true
-        sendButton.heightAnchor.constraint(equalTo: messageInputContainerView.heightAnchor).isActive = true
-        sendButton.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
-    }
 }
 
+// MARK: - UITableViewDelegate
 extension ChatLogController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if (messages.count == 0) {
@@ -363,6 +341,7 @@ extension ChatLogController: UITableViewDelegate {
     }
 }
 
+// MARK: - UITableViewDataSource
 extension ChatLogController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if messages[indexPath.row].imageURL != "" {
@@ -374,7 +353,6 @@ extension ChatLogController: UITableViewDataSource {
         }
     }
 
-    
     func calculateTextCellHeight(indexPath: IndexPath) -> CGFloat {
         let text = messages[indexPath.row].text
         let sizeToFit = CGSize(width: view.frame.width * 2 / 3, height: CGFloat.greatestFiniteMagnitude)
@@ -396,7 +374,9 @@ extension ChatLogController: UITableViewDataSource {
                 height = maxHeight + 20
             }
         }
-        
+        if height == 0 {
+            return 100
+        }
         return height
     }
     
@@ -407,8 +387,9 @@ extension ChatLogController: UITableViewDataSource {
     }
 }
 
-extension ChatLogController: FirebaseObserverDelegation {
-    func addMessage(message: Message) {
+// MARK: - NewMessagesDelegate
+extension ChatLogController: NewMessagesDelegate {
+    func handleNewChanges(message: Message) {
         self.messages.append(message)
         if message.imageURL != "" {
             self.downloadImage(from: message.imageURL, completion: { _ in
@@ -420,6 +401,18 @@ extension ChatLogController: FirebaseObserverDelegation {
             self.tableView.reloadData()
             self.doneCellCount = self.doneCellCount + 1
             self.scrollToBottom()
+        }
+    }
+}
+
+// MARK: - UploadImageMessageDelegate
+extension ChatLogController: UploadImageMessageDelegate {
+    func handleNewChanges(error: Error?, urlString: String?) {
+        if let error = error {
+            self.alertAction(title: "Uploading image failed!", message: String(describing: error))
+        } else {
+            let sendImageMessageCommand = SendImageMessageCommand(sender: self.chatter, imageURL: urlString!, userId: self.userId, interpreterId: self.interpreterEmail.getEncodedEmail())
+            sendImageMessageCommand.execute()
         }
     }
 }

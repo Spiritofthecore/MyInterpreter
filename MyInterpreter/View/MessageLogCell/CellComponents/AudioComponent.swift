@@ -14,6 +14,7 @@ class AudioComponent: CellComponent {
     
     override func reset() {
         super.reset()
+        audioPlayer?.stop()
         audioPlayer = nil
     }
 }

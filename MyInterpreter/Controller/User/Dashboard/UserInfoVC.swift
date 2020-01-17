@@ -39,13 +39,10 @@ class UserInfoVC: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
         self.navigationController?.navigationBar.tintColor = UIColor.black
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        
         if UserInfoVC.objectID.contains("interpreter")
         {
             getInterpreterData()

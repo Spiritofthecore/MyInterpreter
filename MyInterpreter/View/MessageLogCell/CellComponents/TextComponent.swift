@@ -14,7 +14,9 @@ class TextComponent: CellComponent {
     
     override func reset() {
         super.reset()
+        messageText?.removeFromSuperview()
         messageText = nil
+        messageBubbleView?.removeFromSuperview()
         messageBubbleView = nil
     }
 }

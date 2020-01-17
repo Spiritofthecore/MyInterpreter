@@ -13,6 +13,7 @@ class ImageComponent: CellComponent {
     
     override func reset() {
         super.reset()
+        imageMessageView?.removeFromSuperview()
         imageMessageView = nil
     }
 }

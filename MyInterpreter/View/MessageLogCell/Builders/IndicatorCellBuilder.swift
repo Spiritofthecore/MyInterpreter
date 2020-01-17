@@ -51,9 +51,9 @@ class IndicatorCellBuilder: MessageLogCellBuilder {
             return
         }
         cellComponent.messageBubbleView!.translatesAutoresizingMaskIntoConstraints = false
-        cellComponent.messageBubbleView!.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        cellComponent.messageBubbleView!.bottomAnchor.constraint(equalTo: cellComponent.bottomAnchor).isActive = true
-        cellComponent.messageBubbleView!.leftAnchor.constraint(equalTo: cellComponent.leftAnchor).isActive = true
+        cellComponent.messageBubbleView!.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        cellComponent.messageBubbleView!.topAnchor.constraint(equalTo: cellComponent.topAnchor).isActive = true
+        cellComponent.messageBubbleView!.rightAnchor.constraint(equalTo: cellComponent.rightAnchor, constant: -16).isActive = true
         cellComponent.messageBubbleView!.widthAnchor.constraint(equalToConstant: 200).isActive = true
         
         cellComponent.spinner!.translatesAutoresizingMaskIntoConstraints = false
@@ -64,21 +64,28 @@ class IndicatorCellBuilder: MessageLogCellBuilder {
         cellComponent.spinner!.startAnimating()
         
         cellComponent.messageBubbleView!.backgroundColor = .black
+        cellComponent.spinner?.color = .white
      }
      
     func buildLeftCell(viewWidth: CGFloat) {
         guard let cellComponent = cellComponent as? IndicatorComponent else {
             return
         }
-        cellComponent.spinner!.isHidden = false
+        cellComponent.messageBubbleView!.translatesAutoresizingMaskIntoConstraints = false
+        cellComponent.messageBubbleView!.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        cellComponent.messageBubbleView!.topAnchor.constraint(equalTo: cellComponent.topAnchor).isActive = true
+        cellComponent.messageBubbleView!.leftAnchor.constraint(equalTo: cellComponent.leftAnchor, constant: 46).isActive = true
+        cellComponent.messageBubbleView!.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        
         cellComponent.spinner!.translatesAutoresizingMaskIntoConstraints = false
-        cellComponent.spinner!.topAnchor.constraint(equalTo: cellComponent.topAnchor).isActive = true
-        cellComponent.spinner!.bottomAnchor.constraint(equalTo: cellComponent.bottomAnchor).isActive = true
-        cellComponent.spinner!.leftAnchor.constraint(equalTo: cellComponent.leftAnchor, constant: 10).isActive = true
-        cellComponent.spinner!.rightAnchor.constraint(equalTo: cellComponent.rightAnchor).isActive = true
+        cellComponent.spinner!.topAnchor.constraint(equalTo: cellComponent.messageBubbleView!.topAnchor).isActive = true
+        cellComponent.spinner!.bottomAnchor.constraint(equalTo: cellComponent.messageBubbleView!.bottomAnchor).isActive = true
+        cellComponent.spinner!.leftAnchor.constraint(equalTo: cellComponent.messageBubbleView!.leftAnchor).isActive = true
+        cellComponent.spinner!.rightAnchor.constraint(equalTo: cellComponent.messageBubbleView!.rightAnchor).isActive = true
         cellComponent.spinner!.startAnimating()
         
         cellComponent.messageBubbleView!.backgroundColor = .lightGray
+        cellComponent.spinner?.color = .black
      }
     
     

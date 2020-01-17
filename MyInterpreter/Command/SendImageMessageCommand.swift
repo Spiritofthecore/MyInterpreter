@@ -9,7 +9,7 @@
 import Foundation
 import Firebase
 
-class SendImageMessageCommand: GetSetCommand {
+class SendImageMessageCommand: FirebaseCommand {
     var sender: String
     var imageURL: String
     var userId: String
@@ -22,13 +22,8 @@ class SendImageMessageCommand: GetSetCommand {
         self.interpreterId = interpreterId
     }
     
-    func execute() {
-        let stringDate = self.getDateFormat()
-        let messageRef = self.getMessageReference()
-        messageRef.updateChildValues(["sender": sender, "image": imageURL, "user": userId, "interpreter": interpreterId, "time": stringDate])
-    }
-    
-    func getMessageReference() -> DatabaseReference {
-        return Database.database().reference().child("messages").childByAutoId()
+    override func execute() {
+        let stringDate = Date().getString(with: dateFormat)
+        messagesReference.childByAutoId().updateChildValues(["sender": sender, "image": imageURL, "user": userId, "interpreter": interpreterId, "time": stringDate])
     }
 }

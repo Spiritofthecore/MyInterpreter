@@ -14,7 +14,9 @@ class IndicatorComponent: CellComponent {
     
     override func reset() {
         super.reset()
+        spinner?.removeFromSuperview()
         spinner = nil
+        messageBubbleView?.removeFromSuperview()
         messageBubbleView = nil
     }
 }
