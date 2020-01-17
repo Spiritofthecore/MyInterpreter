@@ -15,25 +15,22 @@ protocol MessageLogCellBuilder {
 }
 
 extension MessageLogCellBuilder {
-    mutating func getProduct() -> CellComponent {
-        let product = self.cellComponent
-        self.reset()
-        return product
-    }
     mutating func reset() {
-        cellComponent = CellComponent()
+        cellComponent.reset()
     }
     
     func addAvatarImage(image: UIImage) {
         cellComponent.oponentAvatar = UIImageView(image: image)
-        cellComponent.oponentAvatar!.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        cellComponent.oponentAvatar!.backgroundColor = .clear
         cellComponent.addSubview(cellComponent.oponentAvatar!)
         cellComponent.oponentAvatar!.translatesAutoresizingMaskIntoConstraints = false
         
         cellComponent.oponentAvatar!.leftAnchor.constraint(equalTo: cellComponent.leftAnchor, constant: 8).isActive = true
         cellComponent.oponentAvatar!.widthAnchor.constraint(equalToConstant: 30).isActive = true
         cellComponent.oponentAvatar!.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        cellComponent.oponentAvatar!.bottomAnchor.constraint(equalTo: cellComponent.bottomAnchor).isActive = true
+        let constraint = cellComponent.oponentAvatar!.bottomAnchor.constraint(equalTo: cellComponent.bottomAnchor)
+        constraint.isActive = true
+        constraint.priority = UILayoutPriority(rawValue: 250)
     }
     // Text Cell implements
     func addBubleView() { }
@@ -41,6 +38,9 @@ extension MessageLogCellBuilder {
     
     // Image Cell Implement
     func addImageView() { }
+    
+    // Indicator Cell Implements
+    
     
     // Video Cell Implements
     

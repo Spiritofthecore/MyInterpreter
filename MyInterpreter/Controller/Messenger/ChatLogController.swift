@@ -328,37 +328,37 @@ extension ChatLogController: UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! ChatLogMessageCell
         let director = Director()
         if messages[indexPath.row].imageURL != "" {
-            director.builder = ImageCellBuilder()
+            director.update(builder: ImageCellBuilder())
             if let cachedImage = cache.object(forKey: messages[indexPath.row].imageURL as AnyObject) as? UIImage {
                 if (self.messages[indexPath.row].sender != chatter) {
-                    director.buildLeftImageCell(image: cachedImage, viewSize: self.view.frame.size, avatarImage: leftCellProfileImage!)
-                    cell.cellComponents = director.builder!.getProduct()
+                    director.buildLeftImageCell(image: cachedImage, viewSize: self.view.frame.size, avatarImage: leftCellProfileImage ?? UIImage(named: "userIcon")!)
+                    cell.cellComponents = director.getProduct()
                 } else {
                     director.buildRightImageCell(image: cachedImage, viewSize: self.view.frame.size)
-                    cell.cellComponents = director.builder!.getProduct()
+                    cell.cellComponents = director.getProduct()
                 }
                 self.applyImageTapGesture(to: cell.cellComponents)
             } else {
-                director.builder = IndicatorCellBuilder()
+                director.update(builder: IndicatorCellBuilder())
                 if (self.messages[indexPath.row].sender != chatter) {
-                    director.buildLeftLoadingCell(viewWidth: self.view.frame.width, avatarImage: leftCellProfileImage!)
-                    cell.cellComponents = director.builder!.getProduct()
+                    director.buildLeftLoadingCell(viewWidth: self.view.frame.width, avatarImage: leftCellProfileImage ?? UIImage(named: "userIcon")!)
+                    cell.cellComponents = director.getProduct()
                 } else {
                     director.buildRightLoadingCell(viewSize: self.view.frame.size)
-                    cell.cellComponents = director.builder!.getProduct()
+                    cell.cellComponents = director.getProduct()
                 }
             }
         } else if messages[indexPath.row].text != "" {
-            director.builder = TextCellBuilder()
+            director.update(builder: TextCellBuilder())
             if (self.messages[indexPath.row].sender != chatter) {
-                director.buildLeftTextCell(text: messages[indexPath.row].text, viewWidth: self.view.frame.width, avatarImage: leftCellProfileImage!)
-                cell.cellComponents = director.builder!.getProduct()
+                director.buildLeftTextCell(text: messages[indexPath.row].text, viewWidth: self.view.frame.width, avatarImage: leftCellProfileImage ?? UIImage(named: "userIcon")!)
+                cell.cellComponents = director.getProduct()
             } else {
                 director.buildRightTextCell(text: messages[indexPath.row].text, viewWidth: self.view.frame.width)
-                cell.cellComponents = director.builder!.getProduct()
+                cell.cellComponents = director.getProduct()
             }
         }
-        cell.adjustLayout()
+        cell.addComponents()
         return cell
     }
 }
@@ -369,8 +369,9 @@ extension ChatLogController: UITableViewDataSource {
             return calculateImageCellHeight(indexPath: indexPath)
         } else if messages[indexPath.row].text != "" {
             return calculateTextCellHeight(indexPath: indexPath)
+        } else {
+            return 100
         }
-        return 0
     }
 
     

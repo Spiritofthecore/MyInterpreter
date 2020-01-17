@@ -9,7 +9,14 @@
 import UIKit
 
 class Director {
-    var builder: MessageLogCellBuilder?
+    private var builder: MessageLogCellBuilder?
+    
+    func getProduct() -> CellComponent {
+        if let product = self.builder?.cellComponent {
+            return product
+        }
+        return CellComponent()
+    }
 
     func update(builder: MessageLogCellBuilder) {
         self.builder = builder
@@ -37,6 +44,7 @@ class Director {
             return
         }
         builder.addAvatarImage(image: avatarImage)
+        builder.addBubleView()
         builder.addTextView()
         builder.buildLeftCell(text: text, viewWidth: viewWidth)
     }
@@ -45,6 +53,7 @@ class Director {
         guard let builder = self.builder as? TextCellBuilder else {
             return
         }
+        builder.addBubleView()
         builder.addTextView()
         builder.buildRightCell(text: text, viewWidth: viewWidth)
     }

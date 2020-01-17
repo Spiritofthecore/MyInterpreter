@@ -19,7 +19,7 @@ class ChatLogMessageCell: BaseCell {
         self.backgroundColor = .clear
     }
     
-    func adjustLayout() {
+    func addComponents() {
         self.addSubview(cellComponents)
         cellComponents.translatesAutoresizingMaskIntoConstraints = false
         cellComponents.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
@@ -27,4 +27,5 @@ class ChatLogMessageCell: BaseCell {
         cellComponents.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         cellComponents.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
     }
+
 }

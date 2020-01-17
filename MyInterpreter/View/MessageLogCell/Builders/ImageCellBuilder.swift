@@ -59,5 +59,6 @@ class ImageCellBuilder: MessageLogCellBuilder {
         cellComponent.imageMessageView!.contentMode = .scaleAspectFit
         cellComponent.imageMessageView!.clipsToBounds = true
         cellComponent.imageMessageView!.layer.cornerRadius = 15
+        cellComponent.oponentAvatar?.bottomAnchor.constraint(equalTo: cellComponent.imageMessageView!.bottomAnchor).isActive = true
     }
 }

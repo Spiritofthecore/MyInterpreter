@@ -8,11 +8,13 @@
 
 import UIKit
 
-class IndicatiorComponent: CellComponent {
+class IndicatorComponent: CellComponent {
     var spinner: UIActivityIndicatorView?
+    var messageBubbleView: UIView?
     
     override func reset() {
         super.reset()
         spinner = nil
+        messageBubbleView = nil
     }
 }

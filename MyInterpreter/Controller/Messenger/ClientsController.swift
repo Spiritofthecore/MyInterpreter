@@ -33,7 +33,7 @@ class ClientsController: UIViewController, UITableViewDelegate, UITableViewDataS
         didSet {
             for item in self.newUsersAndBookingID {
                 
-                var arr = item.split(separator: " ")
+                let arr = item.split(separator: " ")
                 let newUserId: String = String(arr[0])
                 let newBookingId: String? = arr.count > 1 ? String(arr[1]) : nil
                 getBookingInfo(from: newBookingId!) { (newBooking) in

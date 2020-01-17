@@ -50,19 +50,25 @@ class TextCellBuilder: MessageLogCellBuilder {
         cellComponent.messageBubbleView!.backgroundColor = .lightGray
     }
     
+    func addBubleView() {
+        guard let cellComponent = cellComponent as? TextComponent else {
+          return
+        }
+        cellComponent.messageBubbleView = UIView()
+        cellComponent.messageBubbleView!.layer.cornerRadius = 15
+        cellComponent.messageBubbleView!.layer.masksToBounds = true
+        cellComponent.addSubview(cellComponent.messageBubbleView!)
+        cellComponent.oponentAvatar?.bottomAnchor.constraint(equalTo: cellComponent.messageBubbleView!.bottomAnchor).isActive = true
+    }
+    
     func addTextView() {
         guard let cellComponent = cellComponent as? TextComponent else {
             return
         }
-        cellComponent.messageBubbleView = UIView()
-        cellComponent.messageBubbleView!.backgroundColor = UIColor(white: 0.95, alpha: 1)
-        cellComponent.messageBubbleView!.layer.cornerRadius = 15
-        cellComponent.messageBubbleView!.layer.masksToBounds = true
         cellComponent.messageText = UITextView()
         cellComponent.messageText!.font = .systemFont(ofSize: 16)
         cellComponent.messageText!.textAlignment = .left
         cellComponent.messageText!.backgroundColor = .clear
-        cellComponent.addSubview(cellComponent.messageBubbleView!)
         cellComponent.addSubview(cellComponent.messageText!)
     }
 }
