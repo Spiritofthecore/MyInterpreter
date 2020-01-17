@@ -62,8 +62,13 @@
 		FA0A11B123CEFEAD003FA9E1 /* IndicatorComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A11B023CEFEAD003FA9E1 /* IndicatorComponent.swift */; };
 		FA0A11B323CEFF25003FA9E1 /* VideoComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A11B223CEFF25003FA9E1 /* VideoComponent.swift */; };
 		FA0A11B623CF12DF003FA9E1 /* FirebaseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A11B523CF12DF003FA9E1 /* FirebaseHandler.swift */; };
+		FA9F1F8323D0BA5000838A1E /* SendTextMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9F1F8223D0BA5000838A1E /* SendTextMessageCommand.swift */; };
+		FA9F1F8523D0BA7600838A1E /* SendImageMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9F1F8423D0BA7600838A1E /* SendImageMessageCommand.swift */; };
+		FA9F1F8723D0BAB500838A1E /* ObserveNewMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9F1F8623D0BAB500838A1E /* ObserveNewMessageCommand.swift */; };
+		FA9F1F8923D0BACA00838A1E /* GetSetCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9F1F8823D0BACA00838A1E /* GetSetCommand.swift */; };
 		FAB487B122B7EE6900162954 /* FullImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB487B022B7EE6900162954 /* FullImageViewController.swift */; };
 		FAB487B322B8043E00162954 /* TableView-Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB487B222B8043E00162954 /* TableView-Extension.swift */; };
+		FAFBB34823D0C3640080D918 /* ObserveCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFBB34723D0C3640080D918 /* ObserveCommand.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -147,8 +152,13 @@
 		FA0A11B023CEFEAD003FA9E1 /* IndicatorComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorComponent.swift; sourceTree = "<group>"; };
 		FA0A11B223CEFF25003FA9E1 /* VideoComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoComponent.swift; sourceTree = "<group>"; };
 		FA0A11B523CF12DF003FA9E1 /* FirebaseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseHandler.swift; sourceTree = "<group>"; };
+		FA9F1F8223D0BA5000838A1E /* SendTextMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTextMessageCommand.swift; sourceTree = "<group>"; };
+		FA9F1F8423D0BA7600838A1E /* SendImageMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendImageMessageCommand.swift; sourceTree = "<group>"; };
+		FA9F1F8623D0BAB500838A1E /* ObserveNewMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObserveNewMessageCommand.swift; sourceTree = "<group>"; };
+		FA9F1F8823D0BACA00838A1E /* GetSetCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetSetCommand.swift; sourceTree = "<group>"; };
 		FAB487B022B7EE6900162954 /* FullImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullImageViewController.swift; sourceTree = "<group>"; };
 		FAB487B222B8043E00162954 /* TableView-Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TableView-Extension.swift"; sourceTree = "<group>"; };
+		FAFBB34723D0C3640080D918 /* ObserveCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObserveCommand.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -310,7 +320,7 @@
 		54E6B5382245E81B000F82D8 /* MyInterpreter */ = {
 			isa = PBXGroup;
 			children = (
-				FA0A11B423CF12AD003FA9E1 /* Helper */,
+				FA0A11B423CF12AD003FA9E1 /* Command */,
 				54E6B5392245E81B000F82D8 /* AppDelegate.swift */,
 				54C8AAA522AA12FA00696C15 /* Model */,
 				54C8AAA622AA130400696C15 /* View */,
@@ -408,12 +418,34 @@
 			path = CellComponents;
 			sourceTree = "<group>";
 		};
-		FA0A11B423CF12AD003FA9E1 /* Helper */ = {
+		FA0A11B423CF12AD003FA9E1 /* Command */ = {
 			isa = PBXGroup;
 			children = (
+				FA9F1F8123D0B9F800838A1E /* GetSetCommand */,
+				FA9F1F8023D0B9DB00838A1E /* ObserveCommand */,
 				FA0A11B523CF12DF003FA9E1 /* FirebaseHandler.swift */,
 			);
-			path = Helper;
+			path = Command;
+			sourceTree = "<group>";
+		};
+		FA9F1F8023D0B9DB00838A1E /* ObserveCommand */ = {
+			isa = PBXGroup;
+			children = (
+				FA9F1F8623D0BAB500838A1E /* ObserveNewMessageCommand.swift */,
+				FAFBB34723D0C3640080D918 /* ObserveCommand.swift */,
+			);
+			name = ObserveCommand;
+			path = ../..;
+			sourceTree = "<group>";
+		};
+		FA9F1F8123D0B9F800838A1E /* GetSetCommand */ = {
+			isa = PBXGroup;
+			children = (
+				FA9F1F8223D0BA5000838A1E /* SendTextMessageCommand.swift */,
+				FA9F1F8423D0BA7600838A1E /* SendImageMessageCommand.swift */,
+				FA9F1F8823D0BACA00838A1E /* GetSetCommand.swift */,
+			);
+			path = GetSetCommand;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -619,7 +651,9 @@
 				54BF5FE522B37E5100D05EB4 /* UserDashboardVC.swift in Sources */,
 				54DBEA7A228802CB00672238 /* PaymentVC.swift in Sources */,
 				54C719E92270C24B001B2BFF /* ListInterpretersCell.swift in Sources */,
+				FAFBB34823D0C3640080D918 /* ObserveCommand.swift in Sources */,
 				54B59CAF224E26FC0026814A /* SignInInterpreterVC.swift in Sources */,
+				FA9F1F8723D0BAB500838A1E /* ObserveNewMessageCommand.swift in Sources */,
 				543EF3F6224E7B79009CEAE6 /* SignUpStage2VC.swift in Sources */,
 				FA0A11AD23CEFE92003FA9E1 /* ImageComponent.swift in Sources */,
 				54E6B5422245E81B000F82D8 /* MyInterpreter.xcdatamodeld in Sources */,
@@ -637,6 +671,7 @@
 				FA0A11A123CEFCEF003FA9E1 /* BuildMessageLogCellDirector.swift in Sources */,
 				FA0A11B623CF12DF003FA9E1 /* FirebaseHandler.swift in Sources */,
 				FA0A11AB23CEFE23003FA9E1 /* AudioComponent.swift in Sources */,
+				FA9F1F8523D0BA7600838A1E /* SendImageMessageCommand.swift in Sources */,
 				FAB487B322B8043E00162954 /* TableView-Extension.swift in Sources */,
 				54E6B53C2245E81B000F82D8 /* MainVC.swift in Sources */,
 				549F869822B4B399003C428B /* ConfirmPaymentVC.swift in Sources */,
@@ -648,6 +683,7 @@
 				FA0A11A023CEFCEF003FA9E1 /* TextCellBuilder.swift in Sources */,
 				54B73F0C22AC10F800402EBF /* UserInfoCell.swift in Sources */,
 				FAB487B122B7EE6900162954 /* FullImageViewController.swift in Sources */,
+				FA9F1F8323D0BA5000838A1E /* SendTextMessageCommand.swift in Sources */,
 				54BE147C22AEA11B00ED5947 /* Picker-Extension.swift in Sources */,
 				54C719E72270C214001B2BFF /* ListInterpretersVC.swift in Sources */,
 				54B59CB7224E37B60026814A /* SignUpStage1VC.swift in Sources */,
@@ -657,6 +693,7 @@
 				FA0A11A223CEFCEF003FA9E1 /* BaseCell.swift in Sources */,
 				54BF5FE722B37E6A00D05EB4 /* UserInfoVC.swift in Sources */,
 				FA0A119D23CEFCEF003FA9E1 /* VideoCellBuilder.swift in Sources */,
+				FA9F1F8923D0BACA00838A1E /* GetSetCommand.swift in Sources */,
 				FA0A11A423CEFCEF003FA9E1 /* ChatLogMessageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

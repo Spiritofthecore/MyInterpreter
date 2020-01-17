@@ -70,6 +70,9 @@ class FirebaseHandler {
         let messageRef = self.getMessageReference()
         messageRef.updateChildValues(["sender": sender, "image": imageURL, "user": userId, "interpreter": interpreterId, "time": stringDate])
     }
+    
+    
+    
     func sendTextMessage(sender: String, text: String, userId: String, interpreterId: String) {
         let stringDate = self.getDateFormat()
         let messageRef = self.getMessageReference()
